@@ -1,11 +1,15 @@
 (function () {
 	
-	/* MODEL SETUP*/
+	/* MODEL */
 	var contacts = {
 		"addressBook" : [
 			{
 				"name" : "dave",
 				"email" : "dave@davesmail.com"
+			},
+			{
+				"name" : "david junior",
+				"email" : "jr@davesmail.com"
 			},
 			{
 				"name" : "barb",
@@ -19,46 +23,71 @@
 				"name" : "janna",
 				"email" : "janna@jannasmail.com"
 			}
-		],
-
-		// implement 'count' method in model for skinniest controller possible!
-		count : function() {
-			return this.addressBook.length;
-		}
+		]
 	};
 
-	/* VIEW SETUP */
+	/* VIEW */
 	var page = {
 		"items" : {
 			"output" : document.getElementById("output"),
 			"searchForm" : document.getElementById("search-form"),
-			"searchBox" : document.getElementById("search-box"),
-			"getAllBtn" : document.getElementById("get-all")
+			"searchBox" : document.getElementById("search-box")
+			//"getAllBtn" : document.getElementById("get-all")
 		},
 
 		/* update function accepts address book entries as inputs in the form of an array of
 		name+email objects; e.g. [{"name":"bob","email":"bob@bob.com"},{"name":"joe","email":"joe@joe.com"}] */
-		update : function(entries) {
-			var outputArea = this.items.output,
+		updatePage : function(entries) {
+			var outputArea = page.items.output,
 				i;
 
 			outputArea.innerHTML = ""; // initialize output element
 
-			if(entries.length)>0{
+			if(entries){
 				for(i=0; i<entries.length; i++){
 					outputArea.innerHTML += '<p><a href="mailto:' + entries[i].email + '">' + entries[i].name + '</a></p>';
 				}
-
 			}
 		},
 
-		/* search function just returns the appropriate search terms from the input box;
+		/* getQueryString function just returns the appropriate search terms from the input box;
 		call from the controller to pull data off the page */
-		search : function() {
-			var searchValue = this.items.searchBox.value;
+		getQueryString : function() {
+			var searchValue = page.items.searchBox.value;
 			return searchValue;
 		}
 
-	}
+	};
+
+	/* CONTROLLER */
+	var controller = {
+		
+		/* search function checks passed query string against each "name" attribute in passed
+		data model, and returns an array with all the found entries */
+		search : function(dataModel, queryString) {
+			if(queryString){
+				var foundItems = [],
+				contacts = dataModel.addressBook,
+				i;
+
+				for(i=0; i<contacts.length; i++){
+					if(contacts[i].name.indexOf(queryString) !== -1){
+						foundItems.push(contacts[i]);
+					}
+				}
+
+				return foundItems;
+			}
+		},
+
+		/* execute function ties everything together */
+		execute : function() {
+			page.updatePage(
+				controller.search(contacts, page.getQueryString() )
+			);
+		}
+	};
+
+	page.items.searchBox.addEventListener("keyup", controller.execute, false);
 
 })();
