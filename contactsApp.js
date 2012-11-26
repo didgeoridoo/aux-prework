@@ -32,7 +32,6 @@
 			"output" : document.getElementById("output"),
 			"searchForm" : document.getElementById("search-form"),
 			"searchBox" : document.getElementById("search-box")
-			//"getAllBtn" : document.getElementById("get-all")
 		},
 
 		/* update function accepts address book entries as inputs in the form of an array of
