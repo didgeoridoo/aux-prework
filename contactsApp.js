@@ -1,31 +1,5 @@
 (function () {
 	
-	/* MODEL */
-	var contacts = {
-		"addressBook" : [
-			{
-				"name" : "dave",
-				"email" : "dave@davesmail.com"
-			},
-			{
-				"name" : "david junior",
-				"email" : "jr@davesmail.com"
-			},
-			{
-				"name" : "barb",
-				"email" : "barb@barbsmail.com"
-			},
-			{
-				"name" : "austin",
-				"email" : "austin@austinsmail.com"
-			},
-			{
-				"name" : "janna",
-				"email" : "janna@jannasmail.com"
-			}
-		]
-	};
-
 	/* VIEW */
 	var page = {
 		"items" : {
@@ -79,11 +53,28 @@
 			}
 		},
 
+		getJSON : function(dataUrl, callback) {
+			var request = new XMLHttpRequest();
+			request.onreadystatechange = function() {
+				if(request.readyState === 4 && request.status === 200){
+					var returnedData = JSON.parse(request.responseText);
+					if(typeof callback === "function"){
+						callback(returnedData);
+					}
+				}
+			}
+			request.open("GET", dataUrl, true);
+			request.send(null);
+		},
+
 		/* execute function ties everything together */
 		execute : function() {
-			page.updatePage(
-				controller.search(contacts, page.getQueryString() )
-			);
+			controller.getJSON("data/contacts.json", function(contacts){
+				page.updatePage(
+					controller.search(contacts, page.getQueryString() )
+				);
+			})
+			
 		}
 	};
 
