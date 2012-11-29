@@ -1,33 +1,27 @@
-(function () {
+$(document).ready(function () {
 	
 	/* VIEW */
 	var page = {
-		"items" : {
-			"output" : document.getElementById("output"),
-			"searchForm" : document.getElementById("search-form"),
-			"searchBox" : document.getElementById("search-box")
-		},
 
 		/* update function accepts address book entries as inputs in the form of an array of
 		name+email objects; e.g. [{"name":"bob","email":"bob@bob.com"},{"name":"joe","email":"joe@joe.com"}] */
 		updatePage : function(entries) {
-			var outputArea = page.items.output,
-				i;
+			var i,
+				output = $("#output");
 
-			outputArea.innerHTML = ""; // initialize output element
+			output.empty(); // initialize output element
 
 			if(entries){
-				for(i=0; i<entries.length; i++){
-					outputArea.innerHTML += '<p><a href="mailto:' + entries[i].email + '">' + entries[i].name + '</a></p>';
-				}
+				$.each(entries, function(i, entry){
+					output.append('<p><a href="mailto:' + entry.email + '">' + entry.name + '</a></p>');
+				});
 			}
 		},
 
 		/* getQueryString function just returns the appropriate search terms from the input box;
 		call from the controller to pull data off the page */
 		getQueryString : function() {
-			var searchValue = page.items.searchBox.value;
-			return searchValue;
+			return $("#search-box").val();
 		}
 
 	};
@@ -43,41 +37,35 @@
 				contacts = dataModel.addressBook,
 				i;
 
-				for(i=0; i<contacts.length; i++){
-					if(contacts[i].name.indexOf(queryString) !== -1){
-						foundItems.push(contacts[i]);
+				$.each(contacts, function(i, contact){
+					if(contact.name.indexOf(queryString) !== -1){
+						foundItems.push(contact);
 					}
-				}
+				});
 
 				return foundItems;
 			}
 		},
 
-		getJSON : function(dataUrl, callback) {
-			var request = new XMLHttpRequest();
-			request.onreadystatechange = function() {
-				if(request.readyState === 4 && request.status === 200){
-					var returnedData = JSON.parse(request.responseText);
-					if(typeof callback === "function"){
-						callback(returnedData);
-					}
-				}
-			}
-			request.open("GET", dataUrl, true);
-			request.send(null);
-		},
-
 		/* execute function ties everything together */
 		execute : function() {
-			controller.getJSON("data/contacts.json", function(contacts){
-				page.updatePage(
-					controller.search(contacts, page.getQueryString() )
-				);
-			})
+			/* this gets a little tricky so sing along... */
 			
-		}
-	};
+			// get JSON data and pass the whole data object to anonymous callback function...
+			$.getJSON("data/contacts.json", function(contacts){ 
 
-	page.items.searchBox.addEventListener("keyup", controller.execute, false);
+				// the updatePage method inside the callback needs to be passed the entries to show...
+				page.updatePage( 
 
-})();
+					// which we pull by searching the data object using the query string from the page!
+					controller.search(contacts, page.getQueryString() ) 
+
+				); // end updatePage method call
+			} // end anonymous function
+			); // end getJSON method
+		} // end execute method definition
+	}; // end controller object
+
+	$("#search-box").keyup( function() { controller.execute() } );
+
+});
