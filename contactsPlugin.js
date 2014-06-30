@@ -65,7 +65,7 @@
 
 					/* this gets a little tricky so sing along... */
 					
-					// method-agnostic; get JSON data and pass the whole data object to anonymous callback function...
+					// ask the model to get JSON data and pass the whole data object to anonymous callback function...
 					model.getData( options.jsonSource, function( contacts ) { 
 
 						// the updatePage method inside the callback needs to be passed the entries to show...
@@ -75,14 +75,14 @@
 							controller.search( contacts, page.getQueryString() ) 
 
 						); // end updatePage method call
-					} // end anonymous function
-					); // end getJSON method
+					} // end anonymous callback function
+					); // end getData method
 				} // end execute method definition
 			}; // end controller object
 
 			var model = {
 
-				// hacky private cache
+				// hacky cache
 				cache : {
 					cachedData : {},
 					lastRefreshed : 0,
@@ -100,11 +100,12 @@
 				},
 
 				getData : function( source, callback ) {
+					// if the cache is valid (based on the timeout value), use it; otherwise go get fresh data and load the cache
 					if( model.cache.isStillValid() ) {	
 						callback( model.cache.cachedData );
-					} else {
-						model.cache.updateRefreshTime();
+					} else {						
 						$.getJSON( source, function( returnedData ) {
+							model.cache.updateRefreshTime();
 							model.cache.cachedData = returnedData;
 							callback( returnedData );
 						});
